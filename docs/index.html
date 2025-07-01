@@ -171,9 +171,10 @@
         /* --- Botões das Cordas --- */
         .string-buttons {
             display: grid;
-            grid-template-columns: repeat(3, 1fr); /* MODIFICADO: Layout de grid unificado */
+            grid-template-columns: repeat(3, 1fr);
             gap: 0.75rem;
             margin-bottom: 2rem;
+            min-height: 124px;
         }
         
         .string-button {
@@ -246,6 +247,25 @@
         #toggle-btn { grid-column: 1 / -1; background-color: var(--primary-color); color: var(--surface-color); }
         #toggle-btn.stop-mode { background-color: var(--red-color); }
 
+        /* --- Seção de Afiliados --- */
+        .affiliate-section {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #374151;
+        }
+        .product-card {
+            background-color: var(--panel-color);
+            border-radius: 0.75rem;
+            overflow: hidden;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            border: 1px solid #374151;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(56, 189, 248, 0.1);
+            border-color: var(--primary-color);
+        }
+
         /* --- Modal de Ajuda --- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -305,15 +325,23 @@
                 <span>Compartilhar</span>
             </button>
         </div>
+
+        <!-- Seção de Afiliados Integrada -->
+        <div class="affiliate-section">
+            <h2 class="text-lg font-bold text-center mb-1 text-sky-400">Equipamentos Recomendados</h2>
+            <p class="text-center text-sm text-gray-400 mb-4">Uma seleção de acessórios úteis para seu instrumento.</p>
+            <div id="affiliate-products" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Cards de produtos gerados dinamicamente -->
+            </div>
+            <p class="text-center text-xs text-gray-500 mt-4">Ao comprar através dos nossos links, você apoia este projeto sem custo adicional. Obrigado!</p>
+        </div>
     </div>
 
     <!-- Modal de Ajuda -->
     <div id="help-modal" class="modal-overlay">
         <div class="modal-content">
             <h2 class="text-2xl font-bold">Como Usar o Afinador</h2>
-            <ul id="help-text">
-                <!-- Conteúdo gerado dinamicamente -->
-            </ul>
+            <ul id="help-text"></ul>
             <button id="close-modal-btn" class="control-button" style="margin-top: 1.5rem; background-color: var(--primary-color); color: var(--surface-color);">Entendi</button>
         </div>
     </div>
@@ -335,6 +363,7 @@
         const helpTextEl = document.getElementById('help-text');
         const selectGuitarBtn = document.getElementById('select-guitar');
         const selectViolaBtn = document.getElementById('select-viola');
+        const affiliateContainer = document.getElementById('affiliate-products');
 
         // --- Variáveis de Áudio e Estado ---
         let audioContext;
@@ -375,6 +404,16 @@
             }
         };
 
+        const affiliateProducts = [
+            { name: 'Cordas Violão Aço D\'Addario EZ900', description: 'Tensão 0.10. Timbre brilhante e durabilidade.', image: 'https://http2.mlstatic.com/D_NQ_NP_2X_866037-MLU78193495673_082024-F.webp', link: 'https://mercadolivre.com/sec/1bNEZuM' },
+            { name: 'Cordas Viola Giannini Cobra', description: 'Para afinação Cebolão em Mi. Tensão leve.', image: 'https://http2.mlstatic.com/D_NQ_NP_2X_708539-MLB49837653644_052022-F.webp', link: 'https://mercadolivre.com/sec/1CSyvC2' },
+            { name: 'Capotraste de Metal', description: 'Prático e resistente, para violão e guitarra.', image: 'https://http2.mlstatic.com/D_NQ_NP_2X_985551-MLU73204720530_122023-F.webp', link: 'https://mercadolivre.com/sec/22sfEzo' },
+            { name: 'Afinador de Clip Cromático', description: 'Preciso para afinar em qualquer ambiente.', image: 'https://http2.mlstatic.com/D_NQ_NP_2X_992699-MLB53883321943_022023-F.webp', link: 'https://mercadolivre.com/sec/1gGqwoy' },
+            { name: 'Suporte de Chão ASK G3S', description: 'Dobrável, seguro e compatível com vários instrumentos.', image: 'https://http2.mlstatic.com/D_NQ_NP_948831-MLA79483683618_102024-O.webp', link: 'https://mercadolivre.com/sec/1Jge8Af' },
+            { name: 'Kit de Palhetas Sortidas', description: 'Diferentes espessuras para encontrar seu som.', image: 'https://http2.mlstatic.com/D_NQ_NP_2X_788533-MLB53883321943_022023-F.webp', link: 'https://mercadolivre.com/sec/1EqwFTc' },
+            { name: 'Suporte de Parede', description: 'Economize espaço e exponha seu instrumento.', image: 'https://http2.mlstatic.com/D_NQ_NP_2X_783884-MLB50872336262_072022-F.webp', link: 'https://mercadolivre.com/sec/1T9b1b3' }
+        ];
+
         // --- Funções Principais ---
         function setupInstrument(instrument) {
             currentInstrument = instrument;
@@ -386,8 +425,6 @@
             selectViolaBtn.classList.toggle('selected', instrument === 'viola');
 
             stringButtonsContainer.innerHTML = '';
-            // MODIFICADO: A classe do container não muda mais
-            stringButtonsContainer.className = 'string-buttons'; 
             tuningSequence.forEach(key => {
                 const stringInfo = data.strings[key];
                 const button = document.createElement('button');
@@ -415,18 +452,13 @@
             const autoCorrelation = new Float32Array(n);
             for (let lag = 0; lag < n; lag++) {
                 let sum = 0;
-                for (let i = 0; i < n - lag; i++) {
-                    sum += buffer[i] * buffer[i + lag];
-                }
+                for (let i = 0; i < n - lag; i++) { sum += buffer[i] * buffer[i + lag]; }
                 autoCorrelation[lag] = sum;
             }
             let maxVal = -1, peakIndex = -1;
             const minPeriod = sampleRate / 1000, maxPeriod = sampleRate / 70;
             for (let i = Math.floor(minPeriod); i < Math.min(n, Math.ceil(maxPeriod)); i++) {
-                if (autoCorrelation[i] > maxVal) {
-                    maxVal = autoCorrelation[i];
-                    peakIndex = i;
-                }
+                if (autoCorrelation[i] > maxVal) { maxVal = autoCorrelation[i]; peakIndex = i; }
             }
             if (peakIndex === -1) return -1;
             const peak = peakIndex;
@@ -453,8 +485,7 @@
             analyser.getFloatTimeDomainData(buffer);
             const fundamentalFreq = getPitch(buffer, audioContext.sampleRate);
             if (fundamentalFreq > 0) {
-                const noteData = getNoteData(fundamentalFreq);
-                updateUI(noteData);
+                updateUI(getNoteData(fundamentalFreq));
             } else {
                 resetUINoteDisplay();
             }
@@ -593,6 +624,25 @@
                 <li><strong>Modo Cromático:</strong> Após afinar todas as cordas, o afinador detectará qualquer nota que você tocar.</li>
             `;
         }
+        
+        function displayRandomProducts() {
+            if (!affiliateContainer) return;
+            const shuffled = affiliateProducts.sort(() => 0.5 - Math.random());
+            const selectedProducts = shuffled.slice(0, 3);
+            affiliateContainer.innerHTML = '';
+            selectedProducts.forEach(product => {
+                const cardHTML = `
+                    <a href="${product.link}" target="_blank" rel="noopener noreferrer sponsored" class="product-card block">
+                        <img src="${product.image}" alt="${product.name}" class="w-full h-32 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/300x200/111827/E5E7EB?text=Imagem+Indisponível';">
+                        <div class="p-3">
+                            <h3 class="font-bold text-base text-white truncate">${product.name}</h3>
+                            <span class="text-xs mt-2 inline-block bg-sky-500 text-white font-semibold px-2 py-1 rounded-full">Ver Oferta</span>
+                        </div>
+                    </a>
+                `;
+                affiliateContainer.innerHTML += cardHTML;
+            });
+        }
 
         // --- Event Listeners ---
         toggleBtn.addEventListener('click', toggleTuner);
@@ -639,7 +689,10 @@
         }
 
         // --- Inicialização ---
-        document.addEventListener('DOMContentLoaded', () => setupInstrument('guitar'));
+        document.addEventListener('DOMContentLoaded', () => {
+            setupInstrument('guitar');
+            displayRandomProducts();
+        });
     </script>
 </body>
 </html>
