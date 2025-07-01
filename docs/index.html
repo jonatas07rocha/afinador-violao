@@ -171,11 +171,10 @@
         /* --- Botões das Cordas --- */
         .string-buttons {
             display: grid;
+            grid-template-columns: repeat(3, 1fr); /* MODIFICADO: Layout de grid unificado */
             gap: 0.75rem;
             margin-bottom: 2rem;
         }
-        .string-buttons.guitar { grid-template-columns: repeat(3, 1fr); }
-        .string-buttons.viola { grid-template-columns: repeat(2, 1fr); }
         
         .string-button {
             background-color: #374151;
@@ -193,9 +192,6 @@
             align-items: center;
             justify-content: center;
             line-height: 1.2;
-        }
-        .string-buttons.viola .string-button:nth-child(5) {
-            grid-column: 1 / -1;
         }
         .string-button:hover {
             background-color: #4B5563;
@@ -291,7 +287,7 @@
             </div>
         </div>
 
-        <div id="string-buttons-container" class="string-buttons guitar">
+        <div id="string-buttons-container" class="string-buttons">
             <!-- Botões serão gerados dinamicamente pelo JS -->
         </div>
 
@@ -385,14 +381,13 @@
             const data = instrumentData[instrument];
             const tuningSequence = Object.keys(data.strings);
 
-            // Atualiza Título e Seletor
             tunerTitleEl.textContent = `Afinador de ${data.name}`;
             selectGuitarBtn.classList.toggle('selected', instrument === 'guitar');
             selectViolaBtn.classList.toggle('selected', instrument === 'viola');
 
-            // Gera botões das cordas
             stringButtonsContainer.innerHTML = '';
-            stringButtonsContainer.className = `string-buttons ${instrument}`;
+            // MODIFICADO: A classe do container não muda mais
+            stringButtonsContainer.className = 'string-buttons'; 
             tuningSequence.forEach(key => {
                 const stringInfo = data.strings[key];
                 const button = document.createElement('button');
