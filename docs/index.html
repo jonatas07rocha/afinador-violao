@@ -6,9 +6,12 @@
     <title>Afinador de Violão</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Tone.js CDN for audio synthesis -->
+    <!-- Tone.js CDN for audio synthesis (Optional, as it's not used in the current implementation) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <!-- ShareThis BEGIN -->
+    <script type="text/javascript" src="https://platform-api.sharethis.com/js/sharethis.js#property=6683808027725a001968842e&product=inline-share-buttons" async="async"></script>
+    <!-- ShareThis END -->
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -65,10 +68,7 @@
             transform-origin: bottom center;
             transition: transform 0.2s ease-out;
         }
-        /* Estilo para corda ativa/sugerida */
-        .string-button.active {
-            @apply ring-4; /* Anel para destacar */
-        }
+        
         /* Estilo para o volume meter */
         #volume-meter-bar {
             transition: width 0.1s ease-out;
@@ -205,6 +205,12 @@
             background-color: #2d3748;
             transform: translateY(-2px);
         }
+        /* Style for ShareThis buttons container */
+        .sharethis-inline-share-buttons {
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid #4a5568; /* A subtle separator */
+        }
     </style>
 </head>
 <body>
@@ -264,6 +270,9 @@
                         Ajuda
                     </button>
                 </div>
+                <!-- ShareThis BEGIN -->
+                <div class="sharethis-inline-share-buttons"></div>
+                <!-- ShareThis END -->
             </div>
 
             <div class="flip-card-back">
@@ -766,8 +775,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             resetUINoteDisplay();
             resetStringButtons();
-            // Inicializa o Tone.js para que esteja pronto para tocar sons
-            initializeAudioSynth(); 
+            // A chamada para initializeAudioSynth() foi removida pois a função não existe no código.
         });
 
     </script>
